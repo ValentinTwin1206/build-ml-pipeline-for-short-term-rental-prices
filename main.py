@@ -16,7 +16,7 @@ _steps = [
     # NOTE: We do not include this in the steps so it is not run by mistake.
     # You first need to promote a model export to "prod" before you can run this,
     # then you need to run this step explicitly
-    "test_regression_model"
+#    "test_regression_model"
 ]
 
 
@@ -70,7 +70,7 @@ def go(config: DictConfig):
                 parameters={
                     "csv": "clean_sample.csv:latest",
                     "ref": "clean_sample.csv:reference",
-                    "kl_threshold": config['data_check']['kl_threshold'],
+                    "kl_threshold": config["data_check"]["kl_threshold"],
                     "min_price": config['etl']['min_price'],
                     "max_price": config['etl']['max_price']
                 },
@@ -96,6 +96,7 @@ def go(config: DictConfig):
             with open(rf_config, "w+") as fp:
                 json.dump(dict(config["modeling"]["random_forest"].items()), fp)
 
+            # use the rf_config we just created as the rf_config parameter for the train_random_forest
             _ = mlflow.run(
                 os.path.join(hydra.utils.get_original_cwd(), "src", "train_random_forest"),
                 "main",
@@ -110,8 +111,8 @@ def go(config: DictConfig):
                 },
             )
 
-
         if "test_regression_model" in active_steps:
+
             _ = mlflow.run(
                 f"{config['main']['components_repository']}/test_regression_model",
                 "main",
@@ -121,7 +122,6 @@ def go(config: DictConfig):
                     "test_dataset": "test_data.csv:latest"
                 },
             )
-
 
 
 if __name__ == "__main__":
